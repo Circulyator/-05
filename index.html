@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HelpDesk IT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f8fafc;
+            color: #0b1a33;
+        }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --gray-900: #0b1a33;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            --radius: 16px;
+        }
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .auth-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f1f5f9 0%, #e9edf5 100%);
+            padding: 20px;
+        }
+        .auth-card {
+            background: white;
+            padding: 40px 36px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow), 0 12px 40px rgba(99, 102, 241, 0.08);
+            width: 100%;
+            max-width: 440px;
+        }
+        .auth-card h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 6px;
+        }
+        .auth-card .sub {
+            color: var(--gray-500);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .auth-card .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .auth-card .brand i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 15px;
+            background: var(--gray-50);
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 6px;
+        }
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.01);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+        .auth-switch a {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-error {
+            color: #e11d48;
+            background: #ffe4e6;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .auth-success {
+            color: #065f46;
+            background: #d1fae5;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .app {
+            display: none;
+        }
+        .app-header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+        .app-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--gray-900);
+        }
+        .logo i {
+            color: var(--primary);
+            font-size: 24px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--gray-500);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .nav-links a.active {
+            background: var(--primary);
+            color: white;
+        }
+        .nav-links a:hover:not(.active) {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-info .badge {
+            background: var(--gray-100);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .user-info .logout {
+            color: var(--gray-500);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .user-info .logout:hover {
+            color: #e11d48;
+        }
+
+        .page {
+            display: none;
+            padding: 32px 0;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .widget {
+            background: white;
+            padding: 20px 20px 18px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+        .widget .num {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        .widget .label {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        .flex-row h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .search-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-filter input,
+        .search-filter select {
+            padding: 8px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 40px;
+            background: white;
+            font-size: 14px;
+        }
+        .search-filter input:focus,
+        .search-filter select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn-sm {
+            padding: 8px 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-sm:hover {
+            background: var(--primary-dark);
+        }
+
+        .table-wrap {
+            background: white;
+            border-radius: var(--radius);
+            overflow-x: auto;
+            box-shadow: var(--shadow);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            background: var(--gray-50);
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+        td {
+            padding: 14px 16px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-new {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .status-in_progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-closed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .kanban-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .kanban-col {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            min-height: 300px;
+        }
+        .kanban-col h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray-700);
+        }
+        .kanban-card {
+            background: var(--gray-50);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+            border-left: 3px solid var(--primary);
+        }
+        .kanban-card:hover {
+            background: var(--gray-100);
+            transform: translateY(-2px);
+        }
+        .kanban-card .title {
+            font-weight: 500;
+        }
+        .kanban-card .meta {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .knowledge-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: 0.2s;
+        }
+        .knowledge-card:hover {
+            transform: translateY(-4px);
+        }
+        .knowledge-card h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .knowledge-card .cat {
+            font-size: 12px;
+            color: var(--primary);
+            background: var(--gray-100);
+            padding: 2px 10px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .knowledge-card p {
+            color: var(--gray-500);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            max-width: 520px;
+            width: 90%;
+            padding: 32px;
+            border-radius: var(--radius);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+        .modal .form-group {
+            margin-bottom: 16px;
+        }
+        .modal .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .modal .btn-group .btn {
+            flex: 1;
+        }
+        .modal .btn-group .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        .modal .btn-group .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .hidden {
+            display: none;
+        }
+        .text-center {
+            text-align: center;
+        }
+        @media (max-width: 680px) {
+            .auth-card {
+                padding: 28px 20px;
+            }
+            .app-header .container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-links {
+                justify-content: center;
+            }
+            .user-info {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="authPage" class="auth-page">
+        <div class="auth-card">
+            <div class="brand"><i class="fas fa-headset"></i>
+                <h1>HelpDesk</h1>
+            </div>
+            <p class="sub">IT-отдел • система заявок</p>
+            <div id="authError" class="auth-error"></div>
+            <div id="authSuccess" class="auth-success"></div>
+            <form id="authForm" novalidate>
+                <div id="loginFields">
+                    <div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Введите email" /></div>
+                    <div class="form-group"><label>Пароль</label><input id="loginPassword" type="password" placeholder="Введите пароль" /></div>
+                </div>
+                <div id="registerFields" class="hidden">
+                    <div class="form-group"><label>ФИО</label><input id="regFullName" type="text" placeholder="Иванов Иван" /></div>
+                    <div class="form-group"><label>Отдел</label><input id="regDepartment" type="text" placeholder="IT" /></div>
+                    <div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="user@kommash.ru" /></div>
+                    <div class="form-group"><label>Пароль</label><input id="regPassword" type="password" placeholder="Минимум 6 символов" minlength="6" /></div>
+                    <div class="form-group"><label>Повтор пароля</label><input id="regPassword2" type="password" placeholder="Повторите пароль" /></div>
+                </div>
+                <button type="submit" class="btn" id="authSubmitBtn">Войти</button>
+            </form>
+            <div class="auth-switch">
+                <span id="authSwitchText">Нет аккаунта? <a id="authSwitchLink">Зарегистрироваться</a></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="app">
+        <header class="app-header">
+            <div class="container">
+                <div class="logo"><i class="fas fa-headset"></i> HelpDesk</div>
+                <div class="nav-links" id="navLinks">
+                    <a class="active" data-page="dashboard"><i class="fas fa-chart-pie"></i> Дашборд</a>
+                    <a data-page="tickets"><i class="fas fa-ticket-alt"></i> Заявки</a>
+                    <a data-page="kanban"><i class="fas fa-columns"></i> Канбан</a>
+                    <a data-page="knowledge"><i class="fas fa-book"></i> База знаний</a>
+                </div>
+                <div class="user-info">
+                    <span id="userDisplay" class="badge"><i class="fas fa-user"></i> <span id="userName">Admin</span></span>
+                    <span class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div id="page-dashboard" class="page active">
+                <h2>Дашборд</h2>
+                <div class="widget-grid" id="widgetGrid">
+                    <div class="widget"><div class="num" id="wTotal">0</div><div class="label">Всего заявок</div></div>
+                    <div class="widget"><div class="num" id="wNew">0</div><div class="label">Открыто</div></div>
+                    <div class="widget"><div class="num" id="wProgress">0</div><div class="label">В работе</div></div>
+                    <div class="widget"><div class="num" id="wResolvedToday">0</div><div class="label">Решено сегодня</div></div>
+                </div>
+            </div>
+
+            <div id="page-tickets" class="page">
+                <div class="flex-row">
+                    <h2>Заявки</h2>
+                    <button class="btn-sm" id="openTicketModal"><i class="fas fa-plus"></i> Создать</button>
+                </div>
+                <div class="search-filter">
+                    <input type="text" id="ticketSearch" placeholder="Поиск по № / заголовку" />
+                    <select id="filterStatus"><option value="">Все статусы</option><option value="new">Новые</option><option value="in_progress">В работе</option><option value="resolved">Решены</option><option value="closed">Закрыты</option></select>
+                    <select id="filterPriority"><option value="">Все приоритеты</option><option value="critical">Критический</option><option value="high">Высокий</option><option value="medium">Средний</option><option value="low">Низкий</option></select>
+                </div>
+                <div class="table-wrap" style="margin-top:16px;">
+                    <table>
+                        <thead>
+                            <tr><th>№</th><th>Заголовок</th><th>Категория</th><th>Приоритет</th><th>Статус</th><th>Дата</th></tr>
+                        </thead>
+                        <tbody id="ticketTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-kanban" class="page">
+                <h2>Канбан-доска</h2>
+                <p style="color:var(--gray-500); margin-bottom:12px;">Клик по карточке → следующий статус</p>
+                <div class="kanban-grid" id="kanbanGrid"></div>
+            </div>
+
+            <div id="page-knowledge" class="page">
+                <div class="flex-row">
+                    <h2>База знаний</h2>
+                    <button class="btn-sm" id="openArticleModal"><i class="fas fa-plus"></i> Статья</button>
+                </div>
+                <input type="text" id="knowledgeSearch" placeholder="Поиск по статьям..." style="padding:10px 18px; border-radius:40px; border:1px solid var(--gray-200); width:100%; max-width:360px; margin-bottom:16px;" />
+                <div class="knowledge-grid" id="knowledgeGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal"><h2>Создать заявку</h2>
+            <form id="ticketForm">
+                <div class="form-group"><label>Заголовок</label><input id="ticketTitle" required /></div>
+                <div class="form-group"><label>Категория</label><select id="ticketCategory"><option value="hardware">Оборудование</option><option value="software">ПО</option><option value="network">Сеть</option><option value="access">Доступ</option><option value="other">Другое</option></select></div>
+                <div class="form-group"><label>Приоритет</label><select id="ticketPriority"><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option><option value="critical">Критический</option></select></div>
+                <div class="form-group"><label>Описание</label><textarea id="ticketDescription" rows="3"></textarea></div>
+                <div class="btn-group"><button type="submit" class="btn">Создать</button><button type="button" class="btn btn-secondary" id="closeTicketModal">Отмена</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal"><h2>Новая статья</h2>
+            <form id="articleForm">
+                <div class="form-group"><label>Заголовок</label><input id="articleTitle" required /></div>
+                <div class="form-group"><label>Категория</label><select id="articleCategory"><option value="hardware">Оборудование</option><option value="software">ПО</option><option value="network">Сеть</option><option value="access">Доступ</option><option value="other">Другое</option></select></div>
+                <div class="form-group"><label>Описание проблемы</label><textarea id="articleProblem" rows="2"></textarea></div>
+                <div class="form-group"><label>Решение</label><textarea id="articleSolution" rows="3"></textarea></div>
+                <div class="btn-group"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn btn-secondary" id="closeArticleModal">Отмена</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ✅ ПРАВИЛЬНЫЙ URL И КЛЮЧ
+        // ============================================================
+        const SUPABASE_URL = 'https://bmzdlgwonfrhijyqirwc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_JPQYCh884Vc2xo1AxPnHiA_TedKOXYm';
+        // ============================================================
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let allTickets = [];
+        let allArticles = [];
+
+        const $ = id => document.getElementById(id);
+        const authPage = $('authPage'),
+            app = $('app');
+        const authError = $('authError'),
+            authSuccess = $('authSuccess');
+        const authForm = $('authForm');
+        const loginEmail = $('loginEmail'),
+            loginPassword = $('loginPassword');
+        const regFields = $('registerFields'),
+            loginFields = $('loginFields');
+        const authSubmitBtn = $('authSubmitBtn');
+        const userName = $('userName');
+        const logoutBtn = $('logoutBtn');
+        const navLinks = document.querySelectorAll('#navLinks a');
+
+        let isLogin = true;
+
+        // ============================================================
+        // ПЕРЕКЛЮЧЕНИЕ МЕЖДУ ВХОДОМ И РЕГИСТРАЦИЕЙ
+        // ============================================================
+        function toggleAuthMode() {
+            isLogin = !isLogin;
+            regFields.classList.toggle('hidden');
+            loginFields.classList.toggle('hidden');
+            authSubmitBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+            authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+
+            const switchText = $('authSwitchText');
+            if (isLogin) {
+                switchText.innerHTML = 'Нет аккаунта? <a id="authSwitchLink">Зарегистрироваться</a>';
+            } else {
+                switchText.innerHTML = 'Уже есть аккаунт? <a id="authSwitchLink">Войти</a>';
+            }
+            document.getElementById('authSwitchLink').onclick = toggleAuthMode;
+        }
+
+        document.getElementById('authSwitchLink').onclick = toggleAuthMode;
+
+        // ============================================================
+        // ХЕШИРОВАНИЕ ПАРОЛЯ
+        // ============================================================
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // ============================================================
+        // ВХОД / РЕГИСТРАЦИЯ
+        // ============================================================
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+
+            try {
+                if (isLogin) {
+                    const email = loginEmail.value.trim();
+                    const password = loginPassword.value.trim();
+
+                    if (!email || !password) throw new Error('Заполните все поля');
+
+                    const { data: userData, error: userError } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('email', email)
+                        .maybeSingle();
+
+                    if (userError) throw new Error('Ошибка базы данных');
+                    if (!userData) throw new Error('Пользователь не найден');
+
+                    const passwordHash = await hashPassword(password);
+                    if (userData.password_hash !== passwordHash) throw new Error('Неверный пароль');
+
+                    currentUser = userData;
+                    // Сохраняем сессию в localStorage
+                    localStorage.setItem('helpdesk_user', JSON.stringify(currentUser));
+                    showApp();
+                } else {
+                    const full_name = $('regFullName').value.trim();
+                    const department = $('regDepartment').value.trim() || 'IT';
+                    const email = $('regEmail').value.trim();
+                    const pwd = $('regPassword').value;
+                    const pwd2 = $('regPassword2').value;
+
+                    if (!full_name || !email || !pwd) throw new Error('Заполните все обязательные поля');
+                    if (pwd !== pwd2) throw new Error('Пароли не совпадают');
+                    if (pwd.length < 6) throw new Error('Пароль минимум 6 символов');
+
+                    const { data: existing } = await supabase
+                        .from('users')
+                        .select('email')
+                        .eq('email', email)
+                        .maybeSingle();
+
+                    if (existing) throw new Error('Пользователь уже существует');
+
+                    const passwordHash = await hashPassword(pwd);
+                    const { error } = await supabase
+                        .from('users')
+                        .insert([{ email, full_name, department, role: 'user', password_hash: passwordHash }]);
+
+                    if (error) throw new Error('Ошибка регистрации: ' + error.message);
+
+                    authSuccess.textContent = '✅ Регистрация успешна! Войдите в систему.';
+                    authSuccess.style.display = 'block';
+                    // Переключаем на форму входа
+                    if (!isLogin) toggleAuthMode();
+                    loginEmail.value = email;
+                    loginPassword.value = '';
+                }
+            } catch (err) {
+                authError.textContent = err.message;
+                authError.style.display = 'block';
+            }
+        });
+
+        // ============================================================
+        // ПОКАЗ ОСНОВНОГО ИНТЕРФЕЙСА
+        // ============================================================
+        function showApp() {
+            authPage.style.display = 'none';
+            app.style.display = 'block';
+            userName.textContent = currentUser.full_name;
+
+            const isAdminOrChief = currentUser.role === 'admin' || currentUser.role === 'chief';
+            document.querySelector('[data-page="dashboard"]').style.display = isAdminOrChief ? 'inline-block' : 'none';
+            document.querySelector('[data-page="kanban"]').style.display = isAdminOrChief ? 'inline-block' : 'none';
+
+            loadAllData();
+            navigate('dashboard');
+        }
+
+        // ============================================================
+        // НАВИГАЦИЯ
+        // ============================================================
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const page = link.dataset.page;
+                if (page === 'dashboard' && currentUser.role !== 'admin' && currentUser.role !== 'chief') return;
+                if (page === 'kanban' && currentUser.role !== 'admin' && currentUser.role !== 'chief') return;
+                navigate(page);
+            });
+        });
+
+        function navigate(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(`page-${page}`);
+            if (target) target.classList.add('active');
+            navLinks.forEach(l => l.classList.toggle('active', l.dataset.page === page));
+            if (page === 'dashboard') updateDashboard();
+            if (page === 'tickets') renderTickets();
+            if (page === 'kanban') renderKanban();
+            if (page === 'knowledge') renderKnowledge();
+        }
+
+        // ============================================================
+        // ВЫХОД
+        // ============================================================
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('helpdesk_user');
+            location.reload();
+        });
+
+        // ============================================================
+        // ЗАГРУЗКА ДАННЫХ
+        // ============================================================
+        async function loadAllData() {
+            try {
+                const [tickets, articles] = await Promise.all([
+                    supabase.from('tickets').select('*').order('created_at', { ascending: false }),
+                    supabase.from('knowledge_base').select('*').order('created_at', { ascending: false })
+                ]);
+                allTickets = tickets.data || [];
+                allArticles = articles.data || [];
+                console.log('📊 Загружено заявок:', allTickets.length);
+                console.log('📚 Загружено статей:', allArticles.length);
+            } catch (e) {
+                console.error('Ошибка загрузки данных:', e);
+            }
+        }
+
+        // ============================================================
+        // ДАШБОРД
+        // ============================================================
+        function updateDashboard() {
+            const total = allTickets.length;
+            const open = allTickets.filter(t => t.status === 'new').length;
+            const progress = allTickets.filter(t => t.status === 'in_progress').length;
+            const today = new Date().toISOString().split('T')[0];
+            const resolvedToday = allTickets.filter(t => t.status === 'resolved' && t.resolved_at && t.resolved_at.startsWith(
+                today)).length;
+            $('wTotal').textContent = total;
+            $('wNew').textContent = open;
+            $('wProgress').textContent = progress;
+            $('wResolvedToday').textContent = resolvedToday;
+        }
+
+        // ============================================================
+        // ЗАЯВКИ
+        // ============================================================
+        function renderTickets() {
+            const search = $('ticketSearch').value.toLowerCase();
+            const status = $('filterStatus').value;
+            const priority = $('filterPriority').value;
+            let list = allTickets.filter(t => {
+                const matchSearch = t.number.toLowerCase().includes(search) || t.title.toLowerCase().includes(search);
+                const matchStatus = status ? t.status === status : true;
+                const matchPriority = priority ? t.priority === priority : true;
+                return matchSearch && matchStatus && matchPriority;
+            });
+            const tbody = $('ticketTableBody');
+            if (!list.length) {
+                tbody.innerHTML =
+                    '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--gray-500);">Нет заявок</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(t => `
+                <tr>
+                    <td><strong>${t.number}</strong></td>
+                    <td>${t.title}</td>
+                    <td>${t.category}</td>
+                    <td><span class="status-badge" style="background:${t.priority==='critical'?'#fecaca':'#e5e7eb'};color:${t.priority==='critical'?'#991b1b':'#374151'};">${t.priority}</span></td>
+                    <td><span class="status-badge status-${t.status}">${t.status}</span></td>
+                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        $('ticketSearch').addEventListener('input', renderTickets);
+        $('filterStatus').addEventListener('change', renderTickets);
+        $('filterPriority').addEventListener('change', renderTickets);
+
+        // ============================================================
+        // КАНБАН
+        // ============================================================
+        function renderKanban() {
+            const statuses = ['new', 'in_progress', 'resolved', 'closed'];
+            const labels = { new: 'Новые', in_progress: 'В работе', resolved: 'Решены', closed: 'Закрыты' };
+            const grid = $('kanbanGrid');
+            grid.innerHTML = statuses.map(st => {
+                const cards = allTickets.filter(t => t.status === st);
+                return `<div class="kanban-col"><h3>${labels[st]} <span style="font-weight:400;font-size:14px;color:var(--gray-500);">${cards.length}</span></h3>
+                    ${cards.map(c => `<div class="kanban-card" data-id="${c.id}"><div class="title">${c.title}</div><div class="meta">#${c.number} · ${c.priority}</div></div>`).join('')}
+                </div>`;
+            }).join('');
+
+            document.querySelectorAll('.kanban-card').forEach(el => {
+                el.addEventListener('click', async () => {
+                    const id = parseInt(el.dataset.id);
+                    const ticket = allTickets.find(t => t.id === id);
+                    if (!ticket) return;
+                    const order = ['new', 'in_progress', 'resolved', 'closed'];
+                    let idx = order.indexOf(ticket.status);
+                    const newStatus = order[(idx + 1) % order.length];
+                    const updates = { status: newStatus };
+                    if (newStatus === 'resolved') updates.resolved_at = new Date().toISOString();
+                    if (newStatus === 'closed') updates.closed_at = new Date().toISOString();
+                    await supabase.from('tickets').update(updates).eq('id', id);
+                    await loadAllData();
+                    renderKanban();
+                    if (document.getElementById('page-dashboard').classList.contains('active')) updateDashboard();
+                    if (document.getElementById('page-tickets').classList.contains('active')) renderTickets();
+                });
+            });
+        }
+
+        // ============================================================
+        // БАЗА ЗНАНИЙ
+        // ============================================================
+        function renderKnowledge() {
+            const q = $('knowledgeSearch').value.toLowerCase();
+            const list = allArticles.filter(a => a.title.toLowerCase().includes(q) || a.problem.toLowerCase().includes(q));
+            const grid = $('knowledgeGrid');
+            if (!list.length) { grid.innerHTML = '<p style="color:var(--gray-500);">Статей не найдено</p>'; return; }
+            grid.innerHTML = list.map(a => `
+                <div class="knowledge-card">
+                    <div class="cat">${a.category}</div>
+                    <h4>${a.title}</h4>
+                    <p><strong>Проблема:</strong> ${a.problem}</p>
+                    <p><strong>Решение:</strong> ${a.solution}</p>
+                    <div style="font-size:12px;color:var(--gray-500);margin-top:10px;">${new Date(a.created_at).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        $('knowledgeSearch').addEventListener('input', renderKnowledge);
+
+        // ============================================================
+        // МОДАЛКИ
+        // ============================================================
+        $('openTicketModal').addEventListener('click', () => $('ticketModal').classList.add('open'));
+        $('closeTicketModal').addEventListener('click', () => $('ticketModal').classList.remove('open'));
+        $('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const number = 'TK-' + Date.now().toString().slice(-6);
+            const { error } = await supabase.from('tickets').insert([{
+                number,
+                title: $('ticketTitle').value,
+                category: $('ticketCategory').value,
+                priority: $('ticketPriority').value,
+                description: $('ticketDescription').value,
+                creator_id: currentUser.id,
+                status: 'new'
+            }]);
+            if (!error) {
+                $('ticketModal').classList.remove('open');
+                await loadAllData();
+                renderTickets();
+                if (document.getElementById('page-dashboard').classList.contains('active')) updateDashboard();
+                if (document.getElementById('page-kanban').classList.contains('active')) renderKanban();
+                $('ticketForm').reset();
+            } else {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+
+        $('openArticleModal').addEventListener('click', () => $('articleModal').classList.add('open'));
+        $('closeArticleModal').addEventListener('click', () => $('articleModal').classList.remove('open'));
+        $('articleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await supabase.from('knowledge_base').insert([{
+                title: $('articleTitle').value,
+                category: $('articleCategory').value,
+                problem: $('articleProblem').value,
+                solution: $('articleSolution').value,
+                author_id: currentUser.id
+            }]);
+            if (!error) {
+                $('articleModal').classList.remove('open');
+                await loadAllData();
+                renderKnowledge();
+                $('articleForm').reset();
+            } else {
+                alert('Ошибка: ' + error.message);
+            }
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => {
+            if (e.target === m) m.classList.remove('open');
+        }));
+
+        // ============================================================
+        // СОЗДАНИЕ АДМИНА
+        // ============================================================
+        async function createAdmin() {
+            try {
+                const { data: existing } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('email', 'admin@kommash.ru')
+                    .maybeSingle();
+
+                if (!existing) {
+                    const passwordHash = await hashPassword('admin123');
+                    await supabase.from('users').insert([{
+                        email: 'admin@kommash.ru',
+                        full_name: 'Администратор',
+                        department: 'IT',
+                        role: 'admin',
+                        password_hash: passwordHash
+                    }]);
+                    console.log('✅ Админ создан');
+                }
+            } catch (e) {
+                console.error('Ошибка создания админа:', e);
+            }
+        }
+
+        // ============================================================
+        // ЗАПУСК
+        // ============================================================
+        (async function init() {
+            console.log('🔐 HELP DESK - ИНИЦИАЛИЗАЦИЯ');
+            console.log('🔗 Подключение к:', SUPABASE_URL);
+
+            await createAdmin();
+
+            // Проверяем сохраненную сессию
+            const savedUser = localStorage.getItem('helpdesk_user');
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    // Проверяем что пользователь еще существует в БД
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', userData.id)
+                        .maybeSingle();
+
+                    if (!error && data) {
+                        currentUser = data;
+                        showApp();
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Сессия недействительна');
+                }
+            }
+
+            // Если сессии нет - показываем страницу входа
+            authPage.style.display = 'flex';
+            app.style.display = 'none';
+        })();
+    </script>
+</body>
+</html>
